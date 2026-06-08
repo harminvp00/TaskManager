@@ -7,6 +7,7 @@ const authSchema = new Schema({
     },
     email : {
         type : String,
+        unique : true,
         require : true
     },
     password : {
@@ -15,4 +16,5 @@ const authSchema = new Schema({
     }
 });
 
-export default User = model("user", authSchema);
+const User = model("user", authSchema);
+export default User;
