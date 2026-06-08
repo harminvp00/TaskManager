@@ -15,4 +15,4 @@ const authSchema = new Schema({
     }
 });
 
-export default User = mode("user", authSchema);
+export default User = model("user", authSchema);
