@@ -1,4 +1,4 @@
-import {Schema,model} from "mongoose";
+import { Schema, model } from "mongoose";
 
 const authSchema = new Schema({
     username : {
@@ -7,13 +7,29 @@ const authSchema = new Schema({
     },
     email : {
         type : String,
-        unique : true,
         require : true
     },
-    password : {
+    passwordHash : {
         type : String,
         require : true
+    },
+    verify: {
+        type: Boolean,
+        default: false
+    }, 
+
+    otp: {
+        type: String,
+        default: null
+    },
+
+    optExpiresAt:{
+        type: Date,
+        default: null    
     }
+}, {
+    timestamps: true,
+    strict: true
 });
 
 const User = model("user", authSchema);
