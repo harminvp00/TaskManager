@@ -1,4 +1,4 @@
-import {Schema,model} from "mongoose";
+import { Schema, model } from "mongoose";
 
 const authSchema = new Schema({
     username : {
@@ -7,12 +7,30 @@ const authSchema = new Schema({
     },
     email : {
         type : String,
-        require : true
+        require : true,
+        unique: true
     },
-    password : {
+    passwordHash : {
         type : String,
         require : true
+    },
+    verify: {
+        type: Boolean,
+        default: false
+    }, 
+
+    otp: {
+        type: String,
+        default: null
+    },
+
+    optExpiresAt:{
+        type: Date,
+        default: null    
     }
+}, {
+    timestamps: true,
+    strict: true
 });
 
 export default User = model("user", authSchema);
