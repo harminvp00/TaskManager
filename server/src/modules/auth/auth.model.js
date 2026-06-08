@@ -18,6 +18,12 @@ const authSchema = new Schema({
         default: false
     }, 
 
+    roles: {
+        type: String,
+        default: "user",
+        enum: ['user', 'admin']
+    },
+
     otp: {
         type: String,
         default: null
