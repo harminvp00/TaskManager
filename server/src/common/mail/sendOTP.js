@@ -1,5 +1,3 @@
-
-
 import nodemailer from "nodemailer";
 import "dotenv/config";
 
@@ -10,7 +8,6 @@ const transport = nodemailer.createTransport({
         pass: process.env.SMTP_PASS
     }
 });
-
 
 const send_registration_mail = async (username, email, otp) => {
   const info = await transport.sendMail({
