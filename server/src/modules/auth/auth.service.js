@@ -1,7 +1,3 @@
-
-
-// auth service
-
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import send_registration_mail from "../../common/mail/sendOTP.js"
