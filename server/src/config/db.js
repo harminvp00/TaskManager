@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import "dotenv/config";
 
-const URL = process.env.MONGO_URL;
+const URL = process.env.MONGO_CLOUD;
 
 const connectDB = async() => {
     try{
