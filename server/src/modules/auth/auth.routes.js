@@ -5,7 +5,7 @@ const router = Router();
 
 router.post("/newUser", registerUser);
 router.post("/verify-user", verifyUser);
-router.post('./login', loginUser)
+router.post('/login', loginUser);
 
 /**
  * /login

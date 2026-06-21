@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import send_registration_mail from "../../common/mail/sendOTP.js";
 import { findByEmail, createUser, findByIdandUpdate } from "./auth.repo.js";
+import { getToken } from "../../utils/token.js";
 
 export const register = async (username, email, password) => {
   const existingUser = await findByEmail(email);
@@ -25,17 +26,7 @@ export const register = async (username, email, password) => {
     verify: false,
   });
 
-  const token = jwt.sign(
-    {
-      id: user._id,
-      email: user.email,
-      role: user.roles,
-    },
-    process.env.JWT_SECRET_KEY,
-    {
-      expiresIn: "7d",
-    },
-  );
+  const token = getToken(user._id, user.email, user.role);
 
   send_registration_mail(user.username, user.email, otp);
 
@@ -83,44 +74,33 @@ export const verify = async (email, otp) => {
   };
 };
 
-
-export const login = async (email, password) =>{
-  // check data 
-  if(!email || !password){
-    return{
-      success : false,
-      message : "Information is Missing",
-    }
+export const login = async (email, password) => {
+  // check data
+  if (!email || !password) {
+    return {
+      success: false,
+      message: "Information is Missing",
+    };
   }
-  // find user or verify email 
+  // find user or verify email
   const user = await findByEmail(email);
-  if(!user){
-    return({
-      success : false,
-      message : "User Not Found, Register User"
-    })
+  if (!user) {
+    return {
+      success: false,
+      message: "User Not Found, Register User",
+    };
   }
   // match pass
   const passwordHash = await bcrypt.hash(password, 10);
-  if(!(passwordHash === user.passwordHash)){
-    return{
-      success : false,
-      message : "Password Doesn't match"
-    }
+  if (!(passwordHash === user.passwordHash)) {
+    return {
+      success: false,
+      message: "Password Doesn't match",
+    };
   }
 
   // create token
-   const token = jwt.sign(
-    {
-      id: user._id,
-      email: user.email,
-      role: user.roles,
-    },
-    process.env.JWT_SECRET_KEY,
-    {
-      expiresIn: "7d",
-    },
-  );
+  const token = getToken(user._id, user.email, user.role);
   // send Email acknowledgement
   // return user, token
-}
+};
