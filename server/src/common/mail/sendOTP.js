@@ -2,16 +2,16 @@ import nodemailer from "nodemailer";
 import "dotenv/config";
 
 const transport = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    auth:{
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-    }
+  host: process.env.SMTP_HOST,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
 });
 
 const send_registration_mail = async (username, email, otp) => {
   const info = await transport.sendMail({
-    from: 'Task Manager',
+    from: "Task Manager",
     to: email,
     subject: "Task Manager Verification Code",
     html: `
@@ -106,7 +106,7 @@ const send_registration_mail = async (username, email, otp) => {
       </table>
     </body>
     </html>
-    `
+    `,
   });
 };
 
