@@ -82,3 +82,14 @@ export const verify = async (email, otp) => {
     message: "User verified successfully",
   };
 };
+
+
+export const login = async (email, password) =>{
+
+  // check data 
+  // find user or verify email 
+  // match pass 
+  // create token 
+  // send Email acknowledgement
+  // return user, token
+}
