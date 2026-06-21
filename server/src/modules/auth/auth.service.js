@@ -85,11 +85,42 @@ export const verify = async (email, otp) => {
 
 
 export const login = async (email, password) =>{
-
   // check data 
+  if(!email || !password){
+    return{
+      success : false,
+      message : "Information is Missing",
+    }
+  }
   // find user or verify email 
-  // match pass 
-  // create token 
+  const user = await findByEmail(email);
+  if(!user){
+    return({
+      success : false,
+      message : "User Not Found, Register User"
+    })
+  }
+  // match pass
+  const passwordHash = await bcrypt.hash(password, 10);
+  if(!(passwordHash === user.passwordHash)){
+    return{
+      success : false,
+      message : "Password Doesn't match"
+    }
+  }
+
+  // create token
+   const token = jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+      role: user.roles,
+    },
+    process.env.JWT_SECRET_KEY,
+    {
+      expiresIn: "7d",
+    },
+  );
   // send Email acknowledgement
   // return user, token
 }
