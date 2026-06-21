@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import send_registration_mail from "../../common/mail/sendOTP.js";
+import send_login_alert_mail from "../../common/mail/sendWarning.js"; 
 import { findByEmail, createUser, findByIdandUpdate } from "./auth.repo.js";
 import { getToken } from "../../utils/token.js";
 
@@ -92,8 +93,9 @@ export const login = async (email, password) => {
   }
   // match pass
   const passwordHash = await bcrypt.hash(password, 10);
-  if (!(passwordHash === user.passwordHash)) {
+  if (passwordHash !== user.passwordHash) {
     return {
+      hash : passwordHash,
       success: false,
       message: "Password Doesn't match",
     };
@@ -101,6 +103,14 @@ export const login = async (email, password) => {
 
   // create token
   const token = getToken(user._id, user.email, user.role);
+
   // send Email acknowledgement
+  send_login_alert_mail(user.username,user.email,new Date().toLocaleString());
+
   // return user, token
+  return {
+    success : true,
+    user : user.username,
+    token
+  }
 };

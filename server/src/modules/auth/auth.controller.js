@@ -36,9 +36,9 @@ export const loginUser =  async (req, res)=>{
   try {
     const {email, password} = req.body;
 
-    const res = await services.login(email, password);
+    const response = await services.login(email, password);
 
-    // return response
+    res.json(response);
 
   }catch(error){
     // change this later
