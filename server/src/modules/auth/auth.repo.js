@@ -13,3 +13,9 @@ export const findByIdandUpdate = async (id, updates) => {
     new: true,
   });
 };
+
+/**
+ * Change pass
+ * find Password and compare
+ * more odm query for database operations 
+ */

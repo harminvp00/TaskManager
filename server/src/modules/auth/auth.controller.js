@@ -30,3 +30,27 @@ export const verifyUser = async (req, res) => {
     });
   }
 };
+
+export const loginUser =  async (req, res)=>{
+
+  try {
+    const {email, password} = req.body;
+
+    const res = await services.login(email, password);
+
+    // return response
+
+  }catch(error){
+    // change this later
+    console.error(error.message)
+  }
+}
+
+/**
+ * login {email, pass}
+ * logout 
+ * 
+ * forget password (email)
+ * reset password {token}
+ * chnage password {currPass, newPass} 
+ */
