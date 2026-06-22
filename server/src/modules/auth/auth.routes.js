@@ -1,17 +1,13 @@
 import { Router } from "express";
-import { loginUser, registerUser, verifyUser } from "./auth.controller.js";
+import { changePassword, forgetPassword, loginUser, registerUser, resetPassword, verifyUser } from "./auth.controller.js";
 
 const router = Router();
 
 router.post("/newUser", registerUser);
-router.post("/verify-user", verifyUser);
+router.patch("/verify-user", verifyUser);
 router.post('/login', loginUser);
+router.post('/forgetPassword', forgetPassword);
+router.patch('/resetPassword', resetPassword);
+router.patch('/changePassword', changePassword)
 
-/**
- * /login
- * /logout
- * /forget-password
- * /reset-password
- * /change-password
- */
 export default router;

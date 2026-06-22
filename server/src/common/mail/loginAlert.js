@@ -1,15 +1,8 @@
-import nodemailer from "nodemailer";
-import "dotenv/config";
 
-const transport = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+import transport from "./transport.js";
 
-const send_login_alert_mail = async (
+
+const loginAlert = async (
   username,
   email,
   loginTime
@@ -35,7 +28,7 @@ const send_login_alert_mail = async (
               <tr>
                 <td style="background:#EA4335;padding:40px 30px;">
                   <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:normal;">
-                    Security Alert
+                    Login Alert
                   </h1>
                 </td>
               </tr>
@@ -103,4 +96,5 @@ const send_login_alert_mail = async (
   });
 };
 
-export default send_login_alert_mail;
+
+export default loginAlert;
