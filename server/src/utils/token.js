@@ -1,4 +1,6 @@
-import jwt from "jsonwebtoken";
+
+import jwt, { decode } from "jsonwebtoken";
+import "dotenv/config";
 
 export const getToken = (id, email, role) => {
   const token = jwt.sign(
@@ -16,3 +18,13 @@ export const getToken = (id, email, role) => {
 };
 
 
+
+export const decodeToken =  (token) =>{
+
+  const decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+  return {
+    id: decode.id,
+    email: decode.email
+  }
+}

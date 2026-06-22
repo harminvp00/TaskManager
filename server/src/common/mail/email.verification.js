@@ -1,15 +1,8 @@
-import nodemailer from "nodemailer";
-import "dotenv/config";
 
-const transport = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
 
-const send_registration_mail = async (username, email, otp) => {
+import transport from "./transport.js";
+
+const verificationMail = async (username, email, otp) => {
   const info = await transport.sendMail({
     from: "Task Manager",
     to: email,
@@ -110,4 +103,4 @@ const send_registration_mail = async (username, email, otp) => {
   });
 };
 
-export default send_registration_mail;
+export default verificationMail;
