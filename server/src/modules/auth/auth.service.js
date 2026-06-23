@@ -26,7 +26,7 @@ export const register = async (username, email, password) => {
   const existingUser = await findByEmail(email);
 
   if (existingUser) {
-    throw new Error("Email already registered");
+    return next(createHttpError(400,"User Already Exits"));
   }
 
   const passwordHash = await bcrypt.hash(password, 10);

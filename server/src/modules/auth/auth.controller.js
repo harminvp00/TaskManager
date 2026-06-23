@@ -1,8 +1,9 @@
 
 
+import createHttpError from "http-errors";
 import * as services from "./auth.service.js";
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res, next) => {
   try {
     const result = await services.register(
       req.body.username,
@@ -12,27 +13,21 @@ export const registerUser = async (req, res) => {
 
     return res.status(201).json(result);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    return next(createHttpError(400,error.message));
   }
 };
 
-export const verifyUser = async (req, res) => {
+export const verifyUser = async (req, res, next) => {
   try {
     const result = await services.verify(req.body.email, req.body.otp);
 
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    return next(createHttpError(400,error.message));
   }
 };
 
-export const loginUser = async (req, res) => {
+export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -40,25 +35,24 @@ export const loginUser = async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    // change this later
-    console.error(error.message);
+    return next(createHttpError(400,error.message));
   }
 };
 
 
 // new 
 
-export const forgetPassword = async (req, res) => {
+export const forgetPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     const response = await services.forgetPassword(email);
     res.json(response);
   } catch (error) {
-    res.json({ error: error.message });
+    return next(createHttpError(400, error.message));
   }
 };
 
-export const resetPassword = async (req, res) => {
+export const resetPassword = async (req, res, next) => {
   try {
     const {newPassword} = req.body;
     const token  = req.query.token;
@@ -70,31 +64,28 @@ export const resetPassword = async (req, res) => {
     })
 
   } catch (error) {
-    // change me later
-    res.json({ error: error.message });
+   return next(createHttpError(400,error.message));
   }
 };
 
 
-export const changePassword = async (req, res) => {
+export const changePassword = async (req, res, next) => {
   try {
     const { oldPass, newPass } = req.body;
     const response = await services.changePassword(oldPass, newPass);
     res.send(response);
 
   }catch (error){
-    // update me later 
-    console.error(error.message);
+    return next(createHttpError(400,error.message));
   }
 }
 
 
-export const logout = async (req, res) => {
+export const logout = async (req, res, next) => {
 
   try {
     // logout functionality will come soon!
   }catch(error){
-    // change later 
-    console.log(error.message)
+    return next(createHttpError(400,error.message));
   }
 }
