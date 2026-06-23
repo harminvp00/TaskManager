@@ -13,15 +13,15 @@ import {
 } from "./auth.repo.js";
 
 // utils
-import { getToken, decodeToken } from "../../utils/token.js";
+import { getToken } from "../../utils/token.js";
 
-// common > mail
-import verificationMail from "../../common/mail/email.verification.js";
-import loginAlert from "../../common/mail/email.loginAlert.js";
-import resetPasswordMail from "../../common/mail/email.resetPass.js";
-import accountVerifiedMail from "../../common/mail/email.verificationAlert.js";
-import informPasswordReset from "../../common/mail/inform.passwordReset.js";
-import { getResetToken } from "../../utils/resetToken.js";
+// utils -> mails 
+import verificationMail from "../../utils/mail/email.verification.js";
+import loginAlert from "../../utils/mail/email.loginAlert.js";
+import informPasswordReset from "../../utils/mail/inform.passwordReset.js";
+import accountVerifiedMail from "../../utils/mail/email.verificationAlert.js";
+import resetPasswordMail from "../../utils/mail/email.resetPass.js"; 
+
 
 export const register = async (username, email, password) => {
   const existingUser = await findByEmail(email);
