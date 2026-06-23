@@ -8,7 +8,7 @@ import crypto from "crypto";
 import {
   findByEmail,
   createUser,
-  findByIdandUpdate,
+  updateUserById,
   findUserByToken,
 } from "./auth.repo.js";
 
@@ -17,16 +17,20 @@ import { getToken, decodeToken } from "../../utils/token.js";
 
 // common > mail
 import verificationMail from "../../common/mail/email.verification.js";
-import loginAlert from "../../common/mail/loginAlert.js";
+import loginAlert from "../../common/mail/email.loginAlert.js";
 import resetPasswordMail from "../../common/mail/email.resetPass.js";
-import "dotenv/config";
+import accountVerifiedMail from "../../common/mail/email.verificationAlert.js";
+import informPasswordReset from "../../common/mail/inform.passwordReset.js";
 import { getResetToken } from "../../utils/resetToken.js";
 
 export const register = async (username, email, password) => {
   const existingUser = await findByEmail(email);
 
   if (existingUser) {
-    return next(createHttpError(400,"User Already Exits"));
+    if (!existingUser.verify) {
+      throw new Error("verify email first!");
+    }
+    throw new Error("Email already registered");
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -43,8 +47,6 @@ export const register = async (username, email, password) => {
     otpExpiresAt,
     verify: false,
   });
-
-  console.log(user);
 
   const token = getToken(user._id, user.email, user.role);
 
@@ -67,7 +69,7 @@ export const verify = async (email, otp) => {
   const user = await findByEmail(email);
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("user not found");
   }
 
   if (!user.otp) {
@@ -82,11 +84,17 @@ export const verify = async (email, otp) => {
     throw new Error("OTP expired");
   }
 
-  await findByIdandUpdate(user._id, {
+  await updateUserById(user._id, {
     verify: true,
     otp: null,
     otpExpiresAt: null,
   });
+
+  await accountVerifiedMail(
+    user.username,
+    user.email,
+    new Date().toLocaleString(),
+  );
 
   return {
     success: true,
@@ -94,145 +102,139 @@ export const verify = async (email, otp) => {
   };
 };
 
-export const login = async (email, password) => {
-  // check data
-  if (!email || !password) {
-   throw new Error("field are not valid ")
+export const verifyEamil = async (email) => {
+  const user = await findByEmail(email);
+
+  if (!user) {
+    throw new Error("user not found");
   }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  await updateUserById(user._id, {
+    otp,
+    otpExpiresAt,
+  });
+
+  await verificationMail(user.username, user.email, otp);
+
+  return {
+    success: true,
+    message: "verification code is send to the register email",
+  };
+};
+
+export const login = async (email, password) => {
   // find user or verify email
   const user = await findByEmail(email);
   if (!user) {
-    return {
-      success: false,
-      message: "User Not Found, Register User",
-    };
+    throw new Error("Incorrect Credentials");
+  }
+
+  if (!user.verify) {
+    throw new Error("verify email first!");
   }
 
   // match pass
   const passwordHash = await bcrypt.compare(password, user.passwordHash);
 
   if (!passwordHash) {
-    return {
-      success: false,
-      message: "Password Doesn't match",
-    };
+    throw new Error("Wrong Credential");
   }
 
-  // create token
   const token = getToken(user._id, user.email, user.role);
+  await loginAlert(user.username, user.email, new Date().toLocaleString());
 
-  // send Email acknowledgement
-  loginAlert(user.username, user.email, new Date().toLocaleString());
-
-  // return user, token
   return {
     success: true,
-    user: user,
     token,
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      verify: user.verify,
+    },
   };
 };
 
-export const forgetPassword = async (email) => {
-  // check the mail first
-  if (!email) {
-    return {
-      success: false,
-      message: "Email is invalid!",
-    };
-  }
-
+export const forget = async (email) => {
   const user = await findByEmail(email);
   if (!user) {
-    return {
-      success: false,
-      message: "User Not Found, Register User",
-    };
+    throw new Error("no user exist");
   }
 
   // generate 32 bytes (256 bits) and convert it to hex string
   const token = crypto.randomBytes(32).toString("hex");
   const tokenHash = getResetToken(token);
-  const resetPassLink = `${process.env.CLIENT_URL}/accounts/resetPassword?token=${token}`;
 
-  await findByIdandUpdate(user._id, {
+  await updateUserById(user._id, {
     resetToken: tokenHash,
     resetTokenExpiresAt: new Date(Date.now() + 10 * 60 * 1000),
   });
 
-  console.log("pass");
-  resetPasswordMail(user?.username, user?.email, resetPassLink);
+  await resetPasswordMail(user?.username, user?.email, token);
 
   return {
     success: true,
-    Message: "Token sent to mail",
+    message: "Token sent to mail",
   };
 };
 
-export const resetPassword = async (token, newPassword) => {
-
-  console.log(token, newPassword);
-  
-  if (!token) {
-    return {
-      success: false,
-      message: "Invald Token!",
-    };
-  }
-
+export const reset = async (token, newPassword) => {
   const tokenHash = getResetToken(token);
 
   const user = await findUserByToken(tokenHash);
 
   if (!user) {
-    throw new Error("Invalid Token!");
+    throw new Error("Invalid Token ");
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 10);
 
-  await findByIdandUpdate(user._id, {
+  await updateUserById(user._id, {
     passwordHash: passwordHash,
     resetToken: null,
     resetTokenExpiresAt: null,
-    resetPasswordUsed: true,
+    resetTokenUsed: true,
   });
 
+  await informPasswordReset(
+    user.username,
+    user.email,
+    new Date().toLocaleString(),
+  );
+
   return {
-    sucess: true,
-    message: "password reset successfully!",
+    success: true,
+    message: "reset password successfully!",
   };
 };
 
-export const changePassword = async (token, oldPass, newPass) => {
-
-  if(!token){
-    throw new Error("invalid token!");
-  }
-
-  if(!oldPass || !newPass){
-    throw new Error("Passwords are not valid");
-  }
-
-  const { id, email } = decodeToken(token);
-
+export const change = async (email, oldPass, newPass) => {
   const user = await findByEmail(email);
 
-  if(!user){
+  if (!user) {
     throw new Error("No User exists");
   }
 
   const matchPass = await bcrypt.compare(oldPass, user.passwordHash);
 
-  if(!matchPass){
+  if (!matchPass) {
     throw new Error("old password is incorrect!");
   }
 
   const passwordHash = await bcrypt.hash(newPass, 10);
-  await findByIdandUpdate(user._id, {
-    passwordHash
-  })
+  await updateUserById(user._id, {
+    passwordHash,
+  });
 
   return {
     success: true,
-    message: "Password is Changed!"
-  }
+    message: "Password is Changed!",
+  };
+};
+
+export const logout = async () => {
+  // insert token in blacklist
 };

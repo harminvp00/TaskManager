@@ -1,5 +1,4 @@
 
-
 import createHttpError from "http-errors";
 import * as services from "./auth.service.js";
 
@@ -27,65 +26,123 @@ export const verifyUser = async (req, res, next) => {
   }
 };
 
+export const verifyEamil = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "email is not valid",
+      });
+    }
+
+    const result = await services.verifyEamil(email);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
 export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "invalid fields",
+      });
+    }
 
     const response = await services.login(email, password);
 
     res.json(response);
   } catch (error) {
-    return next(createHttpError(400,error.message));
+    // change this later
+    console.error(error.message);
   }
 };
 
-
-// new 
+// new
 
 export const forgetPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const response = await services.forgetPassword(email);
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "provide a valid email",
+      });
+    }
+    const response = await services.forget(email);
     res.json(response);
   } catch (error) {
-    return next(createHttpError(400, error.message));
+    res.json({ error: error.message });
   }
 };
 
-export const resetPassword = async (req, res, next) => {
+export const resetPassword = async (req, res) => {
   try {
-    const {newPassword} = req.body;
-    const token  = req.query.token;
+    const token = req.query.token;
+    const { newPassword } = req.body;
 
-    const response = await services.resetPassword(token, newPassword);
+    if (!newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Enter a valid password",
+      });
+    }
+
+    if (newPassword.length < 5) {
+      return res.status(400).json({
+        success: false,
+        message: "password is too weak",
+      });
+    }
+
+    if (!token) {
+      return res.status(500).json({ message: "token is invalid" });
+    }
+
+    const response = await services.reset(token, newPassword);
 
     res.json({
-      response
-    })
-
+      response,
+    });
   } catch (error) {
    return next(createHttpError(400,error.message));
   }
 };
 
 
-export const changePassword = async (req, res, next) => {
+export const changePassword = async (req, res) => {
   try {
+    const email = req.user.email;
     const { oldPass, newPass } = req.body;
-    const response = await services.changePassword(oldPass, newPass);
+
+    if (!oldPass || !newPass) {
+      return res.status(400).json({ message: "passwords are not accepted" });
+    }
+
+    const response = await services.change(email, oldPass, newPass);
     res.send(response);
 
   }catch (error){
-    return next(createHttpError(400,error.message));
+    // update me later 
+    console.error(error.message);
   }
-}
+};
 
-
-export const logout = async (req, res, next) => {
+export const logout = async (req, res) => {
 
   try {
     // logout functionality will come soon!
   }catch(error){
-    return next(createHttpError(400,error.message));
+    // change later 
+    console.log(error.message)
   }
-}
+};

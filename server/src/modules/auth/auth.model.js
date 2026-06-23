@@ -1,19 +1,21 @@
-
-
 import { Schema, model } from "mongoose";
 
+/**
+ * Bugs found from this file,
+ * name mismatch into the sevice file where here is we declare optExpireAt and used otpExpireAt, very small one later chnage this never cause a runtime issues but indirectly make no change in mongodb because we used strict true, which only allow this property only in mongo document, Same thing happen with the roles and we used role in services, so I am changed roles to role only
+ */
 const authSchema = new Schema(
   {
     username: { type: String, required: true },
     email: { type: String, required: true },
     passwordHash: { type: String, required: true },
     verify: { type: Boolean, default: false },
-    roles: { type: String, default: "user", enum: ["user", "admin"] },
+    role: { type: String, default: "user", enum: ["user", "admin"] },
     otp: { type: String, default: null },
-    optExpiresAt: { type: Date, default: null },
+    otpExpiresAt: { type: Date, default: null },
     resetToken: { type: String, default: null },
     resetTokenExpiresAt: { type: Date, default: null },
-    resetPasswordUsed: { type: Boolean, default: false },
+    resetTokenUsed: { type: Boolean, default: false },
   },
   { timestamps: true, strict: true },
 );
