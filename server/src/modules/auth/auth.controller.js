@@ -1,7 +1,8 @@
 
+import createHttpError from "http-errors";
 import * as services from "./auth.service.js";
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res, next) => {
   try {
     const result = await services.register(
       req.body.username,
@@ -11,23 +12,17 @@ export const registerUser = async (req, res) => {
 
     return res.status(201).json(result);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    return next(createHttpError(400,error.message));
   }
 };
 
-export const verifyUser = async (req, res) => {
+export const verifyUser = async (req, res, next) => {
   try {
     const result = await services.verify(req.body.email, req.body.otp);
 
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    return next(createHttpError(400,error.message));
   }
 };
 
@@ -52,7 +47,7 @@ export const verifyEamil = async (req, res) => {
   }
 };
 
-export const loginUser = async (req, res) => {
+export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -67,16 +62,14 @@ export const loginUser = async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+    // change this later
+    console.error(error.message);
   }
 };
 
 // new
 
-export const forgetPassword = async (req, res) => {
+export const forgetPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -88,14 +81,10 @@ export const forgetPassword = async (req, res) => {
     const response = await services.forget(email);
     res.json(response);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+    res.json({ error: error.message });
   }
 };
 
-// reset password controller
 export const resetPassword = async (req, res) => {
   try {
     const token = req.query.token;
@@ -125,14 +114,11 @@ export const resetPassword = async (req, res) => {
       response,
     });
   } catch (error) {
-    // change me later
-    res.json({ error: error.message });
+   return next(createHttpError(400,error.message));
   }
 };
 
-/**
- * Bug: flow is broken
- */
+
 export const changePassword = async (req, res) => {
   try {
     const email = req.user.email;
@@ -144,22 +130,19 @@ export const changePassword = async (req, res) => {
 
     const response = await services.change(email, oldPass, newPass);
     res.send(response);
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+
+  }catch (error){
+    // update me later 
+    console.error(error.message);
   }
 };
 
-export const logoutUser = async (req, res) => {
+export const logout = async (req, res) => {
+
   try {
-    /**
-     * get token from client headers
-     * add to blacklist
-     */
-  } catch (error) {
-    // change later
-    console.log(error.message);
+    // logout functionality will come soon!
+  }catch(error){
+    // change later 
+    console.log(error.message)
   }
 };

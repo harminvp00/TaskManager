@@ -28,7 +28,7 @@ export const register = async (username, email, password) => {
 
   if (existingUser) {
     if (!existingUser.verify) {
-      throw new Error("verify your email");
+      throw new Error("verify email first!");
     }
     throw new Error("Email already registered");
   }
