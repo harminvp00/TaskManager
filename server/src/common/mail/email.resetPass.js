@@ -1,8 +1,13 @@
 
 
+import "dotenv/config";
 import transport from "./transport.js";
 
-const resetPasswordMail = async (username, email, resetLink) => {
+const resetPasswordMail = async (username, email, token) => {
+
+  // reset link 
+  const resetPassLink = `${process.env.CLIENT_URL}/accounts/resetPassword?token=${encodeURIComponent(token)}`;
+
   const info = await transport.sendMail({
     from: "Task Manager",
     to: email,
@@ -49,7 +54,7 @@ const resetPasswordMail = async (username, email, resetLink) => {
                   <!-- Reset Button -->
                   <div style="text-align:center;margin:30px 0;">
                     <a
-                      href="${resetLink}"
+                      href="${resetPassLink}"
                       style="
                         display:inline-block;
                         background:#4285F4;
@@ -70,8 +75,8 @@ const resetPasswordMail = async (username, email, resetLink) => {
                   </p>
 
                   <p style="font-size:14px;word-break:break-all;">
-                    <a href="${resetLink}" style="color:#4285F4;">
-                      ${resetLink}
+                    <a href="${resetPassLink}" style="color:#4285F4;">
+                      ${resetPassLink}
                     </a>
                   </p>
 
