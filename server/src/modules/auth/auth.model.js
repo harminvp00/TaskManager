@@ -8,7 +8,9 @@ const authSchema = new Schema(
   {
     username: { type: String, required: true },
     email: { type: String, required: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, default: null },
+    provider: { type: String, enum: ["local", "github", 'google'], default: "local" },
+    providerId: { type: String, default: null },
     verify: { type: Boolean, default: false },
     role: { type: String, default: "user", enum: ["user", "admin"] },
     otp: { type: String, default: null },

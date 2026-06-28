@@ -1,17 +1,39 @@
+
+// configurations
 import "dotenv/config";
 import dns from "dns";
-import connectDB from "./src/config/db.js"
 import express from "express";
-const app = express();
-import userRoutes from "./src/modules/auth/auth.routes.js"
-import globalHandler from "./src/middlewares/golbalErrorHandler.js";
-import createHttpError from "http-errors";
+import cookieParser from "cookie-parser";
 import cors from 'cors';
+
+// config functions 
+import connectDB from "./src/config/db.js";
+
+// middlewares and rate limit functions 
 import { auth_api_limit } from './src/middlewares/rate.limit.js';
+import globalHandler from "./src/middlewares/golbalErrorHandler.js";
+
+import gitAuthRoutes from './src/modules/gitAuth/git.auth.route.js';
+import userRoutes from "./src/modules/auth/auth.routes.js"
+
+// instances 
+const app = express();
+
+// route to test or ensure server connections
+app.get('/', (req, res)=>{
+    res.send("Task Manager Server is Working");
+})
 
 // API payload validations 
+app.use(cookieParser())
 app.use(express.json({ limit: '500kb' }));
 app.use(express.urlencoded({extended: true, limit: '100kb'}));
+
+// Domain name service configurations
+dns.setServers([
+    '1.1.1.1',
+    '8.8.8.8'
+])
 
 // cors - only this origin can request to the server
 app.use(cors({
@@ -19,16 +41,17 @@ app.use(cors({
     credentials: true,    
 }));
 
-dns.setServers([
-    '1.1.1.1',
-    '8.8.8.8'
-])
-
+// database connetions 
 connectDB();
 
-app.use('/accounts', auth_api_limit);
-app.use("/accounts", userRoutes);
+// middlewares (rate limit)
+app.use('/', auth_api_limit);
 
+// routes 
+app.use('/accounts', userRoutes);
+app.use('/gitAuth', gitAuthRoutes);
+
+// global error catching middleware 
 app.use(globalHandler);
 
 // open server to listen requests
