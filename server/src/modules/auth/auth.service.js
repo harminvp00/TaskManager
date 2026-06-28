@@ -112,11 +112,25 @@ export const verify = async (email, otp) => {
   };
 };
 
+/**
+ * it sends a verification email to the user with a new OTP if the user is not already verified and if an OTP has not been sent recently.
+ * a new OTP is generated, stored in the user's record, and sent via email.
+ * @param {string} email the email of the user to send the verification email
+ * @returns returns an object containing a success message indicating that the verification code has been sent to the registered email.
+ */
 export const verifyEmail = async (email) => {
   const user = await findByEmail(email);
 
   if (!user) {
     throw new Error("user not found");
+  }
+
+  if (user.verify) {
+    throw new Error("user already verified");
+  }
+
+  if(user.otp && new Date() < user.otpExpiresAt) {
+    throw new Error("OTP already sent, please check your email");
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();

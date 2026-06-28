@@ -26,8 +26,14 @@ router.post("/newUser", registerUser);
  */
 router.patch("/verify-user", verifyUser);
 
+/**
+ * @route POST /accounts/verifyEmail
+ * @desc Send a verification email with otp to the user
+ * @access public
+ */
+router.post("/verify-email", verifyEmail);
 
-router.post("/verifyEmail", verifyEmail);
+
 router.post("/login", loginUser);
 router.post("/forgetPassword", forgetPassword);
 router.patch("/resetPassword", resetPassword);

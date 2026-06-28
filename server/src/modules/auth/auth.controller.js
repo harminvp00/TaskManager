@@ -35,24 +35,21 @@ export const verifyUser = async (req, res, next) => {
   }
 };
 
-export const verifyEmail = async (req, res) => {
+//complete
+export const verifyEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "email is not valid",
-      });
+      return next(createHttpError(400,"provide a valid email"));
     }
 
-    const result = await services.verifyEamil(email);
+    const result = await services.verifyEmail(email);
+
     return res.status(200).json(result);
+
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
