@@ -1,9 +1,13 @@
-
 import createHttpError from "http-errors";
 import * as services from "./auth.service.js";
 
+//complete
 export const registerUser = async (req, res, next) => {
   try {
+    if (!req.body.username || !req.body.email || !req.body.password) {
+      return next(createHttpError(400, "invalid fields"));
+    }
+
     const result = await services.register(
       req.body.username,
       req.body.email,
@@ -12,62 +16,90 @@ export const registerUser = async (req, res, next) => {
 
     return res.status(201).json(result);
   } catch (error) {
-    return next(createHttpError(400,error.message));
+    return next(createHttpError(400, error.message));
   }
 };
 
+//complete
 export const verifyUser = async (req, res, next) => {
   try {
+    if (!req.body.email || !req.body.otp) {
+      return next(createHttpError(400, "invalid fields"));
+    }
     const result = await services.verify(req.body.email, req.body.otp);
 
     return res.status(200).json(result);
   } catch (error) {
-    return next(createHttpError(400,error.message));
+    return next(createHttpError(400, error.message));
   }
 };
 
-export const verifyEamil = async (req, res) => {
+//complete
+export const verifyEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "email is not valid",
-      });
+      return next(createHttpError(400, "provide a valid email"));
     }
 
-    const result = await services.verifyEamil(email);
+    const result = await services.verifyEmail(email);
+
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
+//complete
 export const loginUser = async (req, res, next) => {
   try {
+
+    if(req.cookies && req.cookies.refreshToken) {
+      return next(createHttpError(400, "already logged in!"));
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "invalid fields",
-      });
+      return next(createHttpError(400, "provide a valid email and password"));
     }
 
-    const response = await services.login(email, password);
+    //you can check this fields in future for more security
+    const userAgent = req.headers["user-agent"];
+    const ipAddress = req.ip;
 
-    res.json(response);
+    const responseData = await services.login(
+      email,
+      password,
+      userAgent,
+      ipAddress,
+    );
+
+    //set refresh token in cookie
+    res.cookie("refreshToken", responseData.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    //send response
+    res.json({
+      success: responseData.success,
+      accessToken: responseData.accessToken,
+      user: {
+        id: responseData.id,
+        username: responseData.username,
+        email: responseData.email,
+      },
+    });
   } catch (error) {
-    // change this later
-    console.error(error.message);
+    next(error);
   }
 };
 
-// new
+//remainings
 
 export const forgetPassword = async (req, res, next) => {
   try {
@@ -114,10 +146,9 @@ export const resetPassword = async (req, res) => {
       response,
     });
   } catch (error) {
-   return next(createHttpError(400,error.message));
+    return next(createHttpError(400, error.message));
   }
 };
-
 
 export const changePassword = async (req, res) => {
   try {
@@ -130,19 +161,17 @@ export const changePassword = async (req, res) => {
 
     const response = await services.change(email, oldPass, newPass);
     res.send(response);
-
-  }catch (error){
-    // update me later 
+  } catch (error) {
+    // update me later
     console.error(error.message);
   }
 };
 
-export const logout = async (req, res) => {
-
+export const logoutUser = async (req, res) => {
   try {
     // logout functionality will come soon!
-  }catch(error){
-    // change later 
-    console.log(error.message)
+  } catch (error) {
+    // change later
+    console.log(error.message);
   }
 };
