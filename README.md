@@ -9,6 +9,5 @@ Server:
 - Used middleware to track errors
 
 #### by harminvp00
-- Server: Added simple rate limit function
-- Server: Added OAuth for GitHub
-- Client: Simple page to test OAuth 
+- Client: Test pages such Login and Dashboard to implement OAuth feature using client-server communication
+- Server: Implemented Google OAuth and Github OAuth

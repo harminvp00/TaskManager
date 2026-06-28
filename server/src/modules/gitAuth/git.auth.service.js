@@ -4,6 +4,7 @@ import {  createUser, findOAuthUser } from "../auth/auth.repo.js";
 
 const registerUser= async (user) => {
 
+  console.log(user)
     const newUser = await createUser({
         username: user.name || user.login,
         email: user.email,
@@ -12,7 +13,6 @@ const registerUser= async (user) => {
         verify: true
     }); 
 
-    console.log(newUser);
     return {
         message: 'create a new user',
         user: {
@@ -53,9 +53,7 @@ export const getUserFromGitHub = async (token) => {
       Accept: "application/json",
     },
   });
-
   const githubUser = user.data;
-
   const userExist = await findOAuthUser("github", `${githubUser.id}`);
 
   if (!userExist) {

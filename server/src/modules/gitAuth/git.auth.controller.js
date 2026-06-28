@@ -3,16 +3,16 @@ import {
   getAccessTokenFromGitHub,
   getUserFromGitHub
  } from "./git.auth.service.js";
-import { getToken } from '../../utils/tokens/token.js';
+import { getAccessToken } from '../../utils/tokens/token.js';
 import "dotenv/config";
 
 
 export const gitLoginUser = (req, res) => {
   const url =
-    `https://github.com/login/oauth/authorize` +
-    `?client_id=${process.env.GITHUB_CLIENT_ID}` +
-    `&scope=user:email`;
-
+  `https://github.com/login/oauth/authorize` +
+  `?client_id=${process.env.GITHUB_CLIENT_ID}` +
+  `&scope=user:email`;
+  
   res.redirect(url);
 };
 
@@ -25,7 +25,7 @@ export const gitCallback = async (req, res) => {
     const AccessToken = await getAccessTokenFromGitHub(code);
     const response = await getUserFromGitHub(AccessToken);
     
-    const token = getToken(
+    const token = getAccessToken(
       response?.user?.id, 
       response?.user?.email, 
       response?.user?.role
@@ -37,7 +37,7 @@ export const gitCallback = async (req, res) => {
       sameSite: "lax",
     });
 
-    return res.redirect("http://localhost:5173/");
+    return res.redirect("http://localhost:5173/dashboard");
 
   } catch(error){
     return res.status(500).json({

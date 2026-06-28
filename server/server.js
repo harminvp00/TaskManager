@@ -13,8 +13,9 @@ import connectDB from "./src/config/db.js";
 import { auth_api_limit } from './src/middlewares/rate.limit.js';
 import globalHandler from "./src/middlewares/golbalErrorHandler.js";
 
-import gitAuthRoutes from './src/modules/gitAuth/git.auth.route.js';
 import userRoutes from "./src/modules/auth/auth.routes.js"
+import gitAuthRoutes from './src/modules/gitAuth/git.auth.route.js';
+import googleAuth from './src/modules/googleAuth/googleAuth.route.js';
 
 // instances 
 const app = express();
@@ -45,11 +46,12 @@ app.use(cors({
 connectDB();
 
 // middlewares (rate limit)
-app.use('/', auth_api_limit);
+app.use(auth_api_limit);
 
 // routes 
 app.use('/accounts', userRoutes);
 app.use('/gitAuth', gitAuthRoutes);
+app.use('/googleAuth', googleAuth)
 
 // global error catching middleware 
 app.use(globalHandler);
