@@ -13,7 +13,7 @@ import {
 } from "./auth.repo.js";
 
 // utils
-import { getToken } from "../../utils/token.js";
+import { getToken } from "../../utils/tokens/token.js";
 
 // utils -> mails 
 import verificationMail from "../../utils/mail/email.verification.js";

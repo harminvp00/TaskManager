@@ -62,8 +62,10 @@ export const loginUser = async (req, res, next) => {
 
     res.json(response);
   } catch (error) {
-    // change this later
-    console.error(error.message);
+     res.status(400).json({
+      success: false,
+      message: error.message
+     })
   }
 };
 
@@ -137,7 +139,7 @@ export const changePassword = async (req, res) => {
   }
 };
 
-export const logout = async (req, res) => {
+export const logoutUser = async (req, res) => {
 
   try {
     // logout functionality will come soon!
