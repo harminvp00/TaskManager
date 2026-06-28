@@ -4,6 +4,10 @@ import * as services from "./auth.service.js";
 
 export const registerUser = async (req, res, next) => {
   try {
+    if (!req.body.username || !req.body.email || !req.body.password) {
+      return next(createHttpError(400,"invalid fields"));
+    }
+
     const result = await services.register(
       req.body.username,
       req.body.email,
@@ -26,7 +30,7 @@ export const verifyUser = async (req, res, next) => {
   }
 };
 
-export const verifyEamil = async (req, res) => {
+export const verifyEmail = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -137,7 +141,7 @@ export const changePassword = async (req, res) => {
   }
 };
 
-export const logout = async (req, res) => {
+export const logoutUser = async (req, res) => {
 
   try {
     // logout functionality will come soon!

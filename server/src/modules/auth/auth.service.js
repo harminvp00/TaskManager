@@ -13,7 +13,7 @@ import {
 } from "./auth.repo.js";
 
 // utils
-import { getToken } from "../../utils/token.js";
+import { getToken } from "../../utils/tokens/token.js";
 
 // utils -> mails 
 import verificationMail from "../../utils/mail/email.verification.js";
@@ -22,14 +22,18 @@ import informPasswordReset from "../../utils/mail/inform.passwordReset.js";
 import accountVerifiedMail from "../../utils/mail/email.verificationAlert.js";
 import resetPasswordMail from "../../utils/mail/email.resetPass.js"; 
 
+/**
+ * it registers a new user by checking if the email is already registered, hashing the password, generating an OTP for email verification, and sending a verification email.
+ * @param {string} username  
+ * @param {string} email 
+ * @param {string} password 
+ * @returns {object} success message and user data
+ */
 
 export const register = async (username, email, password) => {
   const existingUser = await findByEmail(email);
 
   if (existingUser) {
-    if (!existingUser.verify) {
-      throw new Error("verify email first!");
-    }
     throw new Error("Email already registered");
   }
 
@@ -45,17 +49,13 @@ export const register = async (username, email, password) => {
     passwordHash,
     otp,
     otpExpiresAt,
-    verify: false,
   });
-
-  const token = getToken(user._id, user.email, user.role);
 
   verificationMail(user.username, user.email, otp);
 
   return {
     success: true,
     message: "User registered successfully",
-    token,
     user: {
       id: user._id,
       username: user.username,
