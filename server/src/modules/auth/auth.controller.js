@@ -2,6 +2,7 @@
 import createHttpError from "http-errors";
 import * as services from "./auth.service.js";
 
+//complete
 export const registerUser = async (req, res, next) => {
   try {
     if (!req.body.username || !req.body.email || !req.body.password) {
@@ -20,8 +21,12 @@ export const registerUser = async (req, res, next) => {
   }
 };
 
+//complete
 export const verifyUser = async (req, res, next) => {
   try {
+    if (!req.body.email || !req.body.otp) {
+      return next(createHttpError(400,"invalid fields"));
+    }
     const result = await services.verify(req.body.email, req.body.otp);
 
     return res.status(200).json(result);

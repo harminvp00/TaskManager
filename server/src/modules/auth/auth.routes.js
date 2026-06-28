@@ -6,15 +6,28 @@ import {
   registerUser,
   resetPassword,
   verifyUser,
-  verifyEamil,
+  verifyEmail,
   logoutUser
 } from "./auth.controller.js";
 import authenticateToken from "../../middlewares/authenticateToken.js";
 const router = Router();
 
+/**
+ * @route POST /accounts/newUser
+ * @desc Register a new user
+ * @access public
+ */
 router.post("/newUser", registerUser);
+
+/**
+ * @route PATCH /accounts/verify-user
+ * @desc Verify a user with OTP
+ * @access public
+ */
 router.patch("/verify-user", verifyUser);
-router.post("/verifyEmail", verifyEamil);
+
+
+router.post("/verifyEmail", verifyEmail);
 router.post("/login", loginUser);
 router.post("/forgetPassword", forgetPassword);
 router.patch("/resetPassword", resetPassword);

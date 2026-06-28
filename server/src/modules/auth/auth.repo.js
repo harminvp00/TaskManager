@@ -17,7 +17,7 @@ export const createUser = async (payload) => {
  * Forget/Change Password
  */
 export const updateUserById = async (id, updates) => {
-  return await User.updateUserById(id, updates);
+  return await User.findByIdAndUpdate(id, updates, { new: true });
 };
 
 /**

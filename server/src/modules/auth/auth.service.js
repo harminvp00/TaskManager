@@ -65,6 +65,13 @@ export const register = async (username, email, password) => {
   };
 };
 
+/**
+ *  it verifies the user by checking the provided OTP against the stored OTP and its expiration time.
+ * If the verification is successful, it updates the user's verification status and sends a confirmation email.
+ * @param {string} email the email of the user to verify
+ * @param {string} otp the otp sent to the user email
+ * @returns 
+ */
 export const verify = async (email, otp) => {
   const user = await findByEmail(email);
 
@@ -84,7 +91,7 @@ export const verify = async (email, otp) => {
     throw new Error("OTP expired");
   }
 
-  await updateUserById(user._id, {
+  const updatedUser = await updateUserById(user._id, {
     verify: true,
     otp: null,
     otpExpiresAt: null,
@@ -98,11 +105,14 @@ export const verify = async (email, otp) => {
 
   return {
     success: true,
+    userId: user._id,
+    verify : updatedUser.verify,
     message: "User verified successfully",
+
   };
 };
 
-export const verifyEamil = async (email) => {
+export const verifyEmail = async (email) => {
   const user = await findByEmail(email);
 
   if (!user) {
