@@ -33,8 +33,14 @@ router.patch("/verify-user", verifyUser);
  */
 router.post("/verify-email", verifyEmail);
 
-
+/**
+ * @route POST /accounts/login
+ * @desc Login a user and return a JWT token to response body and referesh token to cookie and create session in database
+ * @access public
+ */
 router.post("/login", loginUser);
+
+
 router.post("/forgetPassword", forgetPassword);
 router.patch("/resetPassword", resetPassword);
 router.patch("/changePassword", authenticateToken, changePassword);
