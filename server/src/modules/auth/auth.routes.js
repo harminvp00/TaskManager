@@ -6,16 +6,41 @@ import {
   registerUser,
   resetPassword,
   verifyUser,
-  verifyEamil,
+  verifyEmail,
   logoutUser
 } from "./auth.controller.js";
 import authenticateToken from "../../middlewares/authenticateToken.js";
 const router = Router();
 
+/**
+ * @route POST /accounts/newUser
+ * @desc Register a new user
+ * @access public
+ */
 router.post("/newUser", registerUser);
+
+/**
+ * @route PATCH /accounts/verify-user
+ * @desc Verify a user with OTP
+ * @access public
+ */
 router.patch("/verify-user", verifyUser);
-router.post("/verifyEmail", verifyEamil);
+
+/**
+ * @route POST /accounts/verifyEmail
+ * @desc Send a verification email with otp to the user
+ * @access public
+ */
+router.post("/verify-email", verifyEmail);
+
+/**
+ * @route POST /accounts/login
+ * @desc Login a user and return a JWT token to response body and referesh token to cookie and create session in database
+ * @access public
+ */
 router.post("/login", loginUser);
+
+
 router.post("/forgetPassword", forgetPassword);
 router.patch("/resetPassword", resetPassword);
 router.patch("/changePassword", authenticateToken, changePassword);
