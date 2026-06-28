@@ -49,3 +49,11 @@ export const findUserByToken = async (tokenHash) => {
     resetTokenUsed: false,
   });
 };
+
+
+export const findOAuthUser = async (provider, providerId) => {
+  return await User.findOne({
+    provider,
+    providerId,
+  });
+};
