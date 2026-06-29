@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Aladin&display=swap");
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -11,8 +13,8 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -30,82 +32,97 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+* {
+  padding: 0;
+  margin: 0;
 }
 
 body {
-  margin: 0;
+  color: var(--text-h);
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
+.login-panel {
+  width: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+.login-card {
+  width: 400px;
+  height: 60vh;
+  border: 0;
+  background: rgba(245, 245, 245, 0.724);
+  box-shadow: 1px 1px 3px #000;
+  display: flex;
+  padding: 20px 50px;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 20px;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+.login-card h1 {
+  font-family: "Aladin", system-ui;
+  font-weight: 400;
+  font-style: normal;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+button,
+input {
+  outline: 0;
+  border: 0.1px solid #d8cecee1;
+  font-size: 16px;
+  padding: 10px 15px;
+  border-radius: 8px;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+button:hover {
+  opacity: 60%;
+}
+
+.login-form form {
+  color: #000;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 0 0 20px 0;
+}
+
+.form-btn {
+  color: #f5f5f5;
+  font-weight: bold;
+  background: rgba(161, 161, 9, 0.931);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: opacity 0.36s ease-in-out;
+}
+
+
+.directLogin {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.directLogin button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  transition: opacity 0.36s ease-in-out;
+}
+
+.directLogin button:hover{
+  opacity: 80%;
+  background: #f5f5f5c6;
+  cursor: pointer;
+}
+
+.directLogin button img {
+  width: 25px;
+  height: 25px;
 }
