@@ -101,7 +101,7 @@ export const loginUser = async (req, res, next) => {
 
 //remainings
 
-export const forgetPassword = async (req, res, next) => {
+export const forgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -117,7 +117,7 @@ export const forgetPassword = async (req, res, next) => {
   }
 };
 
-export const resetPassword = async (req, res) => {
+export const resetPassword = async (req, res, next) => {
   try {
     const token = req.query.token;
     const { newPassword } = req.body;
@@ -167,11 +167,23 @@ export const changePassword = async (req, res) => {
   }
 };
 
-export const logoutUser = async (req, res) => {
+//complete
+export const logoutUser = async (req, res ,next) => {
   try {
-    // logout functionality will come soon!
+    if(!req.cookies || !req.cookies.refreshToken) {
+      return next(createHttpError(400, "Refresh token not found"));
+    }
+
+    const refreshToken = req.cookies.refreshToken;
+
+    const response = await services.logout(refreshToken);
+
+    if(response.success) {
+      res.clearCookie("refreshToken");
+    }
+
+    res.json(response);
   } catch (error) {
-    // change later
-    console.log(error.message);
+    next(error);
   }
 };

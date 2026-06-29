@@ -44,6 +44,12 @@ router.post("/login", loginUser);
 router.post("/forgetPassword", forgetPassword);
 router.patch("/resetPassword", resetPassword);
 router.patch("/changePassword", authenticateToken, changePassword);
+
+/**
+ * @route POST /accounts/logout
+ * @desc Logout a user and delete the session from database and clear the cookie
+ * @access private
+ */
 router.post("/logout", logoutUser)
 
 export default router;

@@ -292,6 +292,26 @@ export const change = async (email, oldPass, newPass) => {
   };
 };
 
-export const logout = async () => {
-  // insert token in blacklist
+/**
+ * it handles the logout process by revoking the user's session associated with the provided refresh token. It hashes the refresh token, searches for the corresponding session in the database, and deletes it if found. If the session is not found or already revoked, it throws an error.
+ * @param {string} refreshToken the refresh token provided by the user for logout, which is used to identify the session to be revoked.
+ * @returns it returns an object indicating the success of the logout operation and a message confirming that the user has been logged out successfully.
+ */
+export const logout = async (refreshToken) => {
+  const hashedRefreshToken = await hashToken(refreshToken);
+
+  const session = await sessionModel.findOne({
+    hashedRefreshToken,
+    revoked: false,
+  });
+  if(!session) {
+    throw new Error("Session not found or already revoked");
+  }
+  
+  await sessionModel.findByIdAndDelete(session._id);
+
+  return {
+    success: true,
+    message: "User logged out successfully",
+  };
 };
