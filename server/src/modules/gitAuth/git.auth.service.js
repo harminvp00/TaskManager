@@ -12,7 +12,6 @@ const registerUser= async (user) => {
         verify: true
     }); 
 
-    console.log(newUser);
     return {
         message: 'create a new user',
         user: {
