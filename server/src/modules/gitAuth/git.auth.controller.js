@@ -3,7 +3,7 @@ import {
   getAccessTokenFromGitHub,
   getUserFromGitHub
  } from "./git.auth.service.js";
-import { getToken } from '../../utils/tokens/token.js';
+import { getAccessToken } from '../../utils/tokens/token.js';
 import "dotenv/config";
 
 
@@ -25,7 +25,7 @@ export const gitCallback = async (req, res) => {
     const AccessToken = await getAccessTokenFromGitHub(code);
     const response = await getUserFromGitHub(AccessToken);
     
-    const token = getToken(
+    const token = getAccessToken(
       response?.user?.id, 
       response?.user?.email, 
       response?.user?.role
