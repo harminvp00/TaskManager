@@ -7,7 +7,8 @@ import {
   resetPassword,
   verifyUser,
   verifyEmail,
-  logoutUser
+  logoutUser,
+  rotateToken,
 } from "./auth.controller.js";
 import authenticateToken from "../../middlewares/authenticateToken.js";
 const router = Router();
@@ -40,6 +41,12 @@ router.post("/verify-email", verifyEmail);
  */
 router.post("/login", loginUser);
 
+/**
+ * @route POST /accounts/refresh
+ * @desc Refresh the access token using the refresh token from cookie and create a new session in database
+ * @access public
+ */
+router.post("/rotate", rotateToken);
 
 router.post("/forgetPassword", forgetPassword);
 router.patch("/resetPassword", resetPassword);

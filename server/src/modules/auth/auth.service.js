@@ -1,6 +1,7 @@
 "use strict";
 
 import sessionModel from "../session/session.model.js";
+import userModel from "./auth.model.js";
 
 // hashing, random string and encryption library
 import bcrypt from "bcryptjs";
@@ -18,8 +19,6 @@ import {
 import {
   getAccessToken,
   getRefreshToken,
-  decodeAccessToken,
-  decodeRefreshToken,
   hashToken,
 } from "../../utils/tokens/token.js";
 
@@ -158,9 +157,9 @@ export const verifyEmail = async (email) => {
 
 /**
  * it handles the login process by verifying the user's credentials, checking if the user is verified, generating a refresh token and access token, creating a session in the database, and sending a login alert email.
- * @param {string} email 
- * @param {string} password 
- * @param {string} userAgent the user agent string from the request headers, which provides information about the user's browser and operating system. 
+ * @param {string} email
+ * @param {string} password
+ * @param {string} userAgent the user agent string from the request headers, which provides information about the user's browser and operating system.
  * @param {string} ipAddress the IP address of the user making the request, which can be used for security and logging purposes.
  * @returns it returns an object containing the success status, access token, refresh token, and user information (id, username, email, and verification status).
  */
@@ -170,7 +169,7 @@ export const login = async (email, password, userAgent, ipAddress) => {
   if (!user) {
     throw new Error("Incorrect Credentials");
   }
-  
+
   // match pass
   const passwordHash = await bcrypt.compare(password, user.passwordHash);
   if (!passwordHash) {
@@ -212,6 +211,48 @@ export const login = async (email, password, userAgent, ipAddress) => {
     email: user.email,
     verify: user.verify,
   };
+};
+
+/**
+ * it verifies a session based on refreshToken hash
+ * if user is log in it generates access token and refreshToken and update refreshToken in current session 
+ * @param {string} oldRefreshToken 
+ * @returns send newly creatd tokens and user
+ */
+export const rotateToken = async (oldRefreshToken) => {
+  const hashedToken = await hashToken(oldRefreshToken);
+
+  const session = await sessionModel.findOne({
+    hashedRefreshToken : hashedToken,
+    revoked : false,
+  });
+
+  console.log(session);
+  if (!session) {
+    throw new Error("Session not found or revoked");
+  }
+  //when we add delete user funtionality
+  //the session will be also deleted hence no need to verify user
+  const user = await userModel.findById(session.userId);
+
+  const accessToken = getAccessToken(
+    user._id,
+    user.role,
+    user.email,
+    session._id,
+  );
+
+  const newRefreshToken = getRefreshToken(user._id,user.email,user.role);
+
+  session.hashedRefreshToken = await hashToken(newRefreshToken);
+  await session.save();
+
+  return {
+    success : "true",
+    user,
+    accessToken,
+    newRefreshToken,
+  }
 };
 
 //remaining
@@ -304,10 +345,13 @@ export const logout = async (refreshToken) => {
     hashedRefreshToken,
     revoked: false,
   });
-  if(!session) {
-    throw new Error("Session not found or already revoked");
+  if (!session) {
+    return {
+      success : false,
+      message : "Refresh Token was not expected in the request! You have to login First."
+    }
   }
-  
+
   await sessionModel.findByIdAndDelete(session._id);
 
   return {

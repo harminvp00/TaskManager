@@ -99,6 +99,36 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
+export const rotateToken = async (req, res, next) => {
+  try {
+    if(!req.cookies || !req.cookies.refreshToken) {
+      return next(createHttpError(400, "User must have to login First"));
+    }
+
+    const refreshToken = req.cookies.refreshToken;
+
+    const response = await services.rotateToken(refreshToken);
+
+    res.cookie("refreshToken",response.newRefreshToken,{
+      httpOnly : true,
+      secure : process.env.NODE_ENV === "production",
+      sameSite : "strict",
+      maxAge : 7 * 24 * 60 * 60 * 1000, //7d
+    })
+
+    res.status(201).json({
+      success : response.success,
+      userId : response.user._id,
+      userMail : response.user.email,
+      userVerified : response.user.verify,
+      accessToken : response.accessToken,
+    })
+  }
+  catch (error) {
+    next(error);
+  }
+}
+
 //remainings
 
 export const forgetPassword = async (req, res) => {
@@ -171,16 +201,14 @@ export const changePassword = async (req, res) => {
 export const logoutUser = async (req, res ,next) => {
   try {
     if(!req.cookies || !req.cookies.refreshToken) {
-      return next(createHttpError(400, "Refresh token not found"));
+      return next(createHttpError(400, "User must have to login First"));
     }
 
     const refreshToken = req.cookies.refreshToken;
 
     const response = await services.logout(refreshToken);
 
-    if(response.success) {
-      res.clearCookie("refreshToken");
-    }
+    res.clearCookie("refreshToken");
 
     res.json(response);
   } catch (error) {
