@@ -18,6 +18,7 @@ Thumbs.db
 .idea/
 .vscode/
 *.log   
+eslint.config.js
 
 # ignore file from server
 index.js
