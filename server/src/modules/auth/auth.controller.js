@@ -77,7 +77,7 @@ export const loginUser = async (req, res, next) => {
     );
 
     //set refresh token in cookie
-    res.cookie("refreshToken", responseData.refreshToken, {
+    res.cookie("refreshToken", responseData.user.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -87,11 +87,13 @@ export const loginUser = async (req, res, next) => {
     //send response
     res.json({
       success: responseData.success,
-      accessToken: responseData.accessToken,
+      message : responseData.message,
       user: {
-        id: responseData.id,
-        username: responseData.username,
-        email: responseData.email,
+        userId: responseData.user.id,
+        username: responseData.user.username,
+        userMail: responseData.user.email,
+        verify : responseData.user.verify,
+        accessToken: responseData.user.accessToken,
       },
     });
   } catch (error) {
@@ -109,7 +111,7 @@ export const rotateToken = async (req, res, next) => {
 
     const response = await services.rotateToken(refreshToken);
 
-    res.cookie("refreshToken",response.newRefreshToken,{
+    res.cookie("refreshToken",response.user.newRefreshToken,{
       httpOnly : true,
       secure : process.env.NODE_ENV === "production",
       sameSite : "strict",
@@ -118,10 +120,13 @@ export const rotateToken = async (req, res, next) => {
 
     res.status(201).json({
       success : response.success,
-      userId : response.user._id,
-      userMail : response.user.email,
-      userVerified : response.user.verify,
-      accessToken : response.accessToken,
+      message : response.message,
+      user : {
+        id : response.user.id,
+        email : response.user.email,
+        verify: response.user.verify,
+        accessToken : response.user.accessToken,
+      }
     })
   }
   catch (error) {

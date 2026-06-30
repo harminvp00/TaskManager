@@ -1,7 +1,7 @@
 "use strict";
 
 import sessionModel from "../session/session.model.js";
-import userModel from "./auth.model.js";
+import authModel from "./auth.model.js";
 
 // hashing, random string and encryption library
 import bcrypt from "bcryptjs";
@@ -21,6 +21,7 @@ import {
   getRefreshToken,
   hashToken,
 } from "../../utils/tokens/token.js";
+import { getResetToken } from "../../utils/tokens/resetToken.js";
 
 // utils -> mails
 import verificationMail from "../../utils/mail/email.verification.js";
@@ -36,12 +37,13 @@ import resetPasswordMail from "../../utils/mail/email.resetPass.js";
  * @param {string} password
  * @returns {object} success message and user data
  */
-
 export const register = async (username, email, password) => {
   const existingUser = await findByEmail(email);
 
   if (existingUser) {
-    throw new Error("Email already registered");
+    throw new Error(
+      "The provided email already registerd, Use other email to register",
+    );
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -64,7 +66,6 @@ export const register = async (username, email, password) => {
     success: true,
     message: "User registered successfully",
     user: {
-      id: user._id,
       username: user.username,
       email: user.email,
       verify: user.verify,
@@ -83,19 +84,19 @@ export const verify = async (email, otp) => {
   const user = await findByEmail(email);
 
   if (!user) {
-    throw new Error("user not found");
+    throw new Error("User is not Registered!");
   }
 
   if (!user.otp) {
-    throw new Error("OTP not available");
+    throw new Error("Send otp request on email to get new otp");
   }
 
   if (user.otp !== otp) {
-    throw new Error("Invalid OTP");
+    throw new Error("The provided otp is invalid! Provide valid otp");
   }
 
   if (new Date() > user.otpExpiresAt) {
-    throw new Error("OTP expired");
+    throw new Error("The provided otp is expired! send another otp request");
   }
 
   const updatedUser = await updateUserById(user._id, {
@@ -112,9 +113,12 @@ export const verify = async (email, otp) => {
 
   return {
     success: true,
-    userId: user._id,
-    verify: updatedUser.verify,
-    message: "User verified successfully",
+    message: "User has been verified! You can now login",
+    user: {
+      userId: user._id,
+      email: user.email,
+      verify: updatedUser.verify,
+    },
   };
 };
 
@@ -128,15 +132,15 @@ export const verifyEmail = async (email) => {
   const user = await findByEmail(email);
 
   if (!user) {
-    throw new Error("user not found");
+    throw new Error("User is not Registered!");
   }
 
   if (user.verify) {
-    throw new Error("user already verified");
+    throw new Error("Client Error! User is Verified");
   }
 
   if (user.otp && new Date() < user.otpExpiresAt) {
-    throw new Error("OTP already sent, please check your email");
+    throw new Error("OTP hase been sent your mailbox, please check your email");
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -151,7 +155,14 @@ export const verifyEmail = async (email) => {
 
   return {
     success: true,
-    message: "verification code is send to the register email",
+    message: "verification code has been sent to the registered email, Kindly check your email for otp",
+    user: {
+      user: {
+        userId: user._id,
+        email: user.email,
+        verify: user.verify,
+      },
+    },
   };
 };
 
@@ -167,18 +178,18 @@ export const login = async (email, password, userAgent, ipAddress) => {
   // find user or verify email
   const user = await findByEmail(email);
   if (!user) {
-    throw new Error("Incorrect Credentials");
+    throw new Error("User is not Registered!");
   }
 
   // match pass
   const passwordHash = await bcrypt.compare(password, user.passwordHash);
   if (!passwordHash) {
-    throw new Error("Incorrect Credentials");
+    throw new Error("Client Error, Invalid password detected");
   }
 
   // check if user is verified on base of email verification
   if (!user.verify) {
-    throw new Error("verify email first!");
+    throw new Error("The user is not verified, verify the user via otp");
   }
 
   // generate refresh token and create session in database
@@ -204,27 +215,30 @@ export const login = async (email, password, userAgent, ipAddress) => {
 
   return {
     success: true,
-    accessToken,
-    refreshToken,
-    id: user._id,
-    username: user.username,
-    email: user.email,
-    verify: user.verify,
+    message : "Login successful, Welcome to the Task Manager!",
+    user : {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      verify: user.verify,
+      accessToken,
+      refreshToken,
+    }
   };
 };
 
 /**
  * it verifies a session based on refreshToken hash
- * if user is log in it generates access token and refreshToken and update refreshToken in current session 
- * @param {string} oldRefreshToken 
+ * if user is log in it generates access token and refreshToken and update refreshToken in current session
+ * @param {string} oldRefreshToken
  * @returns send newly creatd tokens and user
  */
 export const rotateToken = async (oldRefreshToken) => {
   const hashedToken = await hashToken(oldRefreshToken);
 
   const session = await sessionModel.findOne({
-    hashedRefreshToken : hashedToken,
-    revoked : false,
+    hashedRefreshToken: hashedToken,
+    revoked: false,
   });
 
   console.log(session);
@@ -233,7 +247,7 @@ export const rotateToken = async (oldRefreshToken) => {
   }
   //when we add delete user funtionality
   //the session will be also deleted hence no need to verify user
-  const user = await userModel.findById(session.userId);
+  const user = await authModel.findById(session.userId);
 
   const accessToken = getAccessToken(
     user._id,
@@ -242,17 +256,22 @@ export const rotateToken = async (oldRefreshToken) => {
     session._id,
   );
 
-  const newRefreshToken = getRefreshToken(user._id,user.email,user.role);
+  const newRefreshToken = getRefreshToken(user._id, user.email, user.role);
 
   session.hashedRefreshToken = await hashToken(newRefreshToken);
   await session.save();
 
   return {
-    success : "true",
-    user,
-    accessToken,
-    newRefreshToken,
-  }
+    success: "true",
+    message : "Token Refreshed succesfully",
+    user : {
+      id : user._id,
+      email : user.email,
+      verify : user.verify,
+      accessToken,
+      newRefreshToken,
+    },
+  };
 };
 
 //remaining
@@ -347,15 +366,24 @@ export const logout = async (refreshToken) => {
   });
   if (!session) {
     return {
-      success : false,
-      message : "Refresh Token was not expected in the request! You have to login First."
-    }
+      success: false,
+      message:
+        "Refresh Token was not expected in the request! You have to login First.",
+    };
   }
+
+  const user = await authModel.findById(session.userId);
 
   await sessionModel.findByIdAndDelete(session._id);
 
   return {
     success: true,
     message: "User logged out successfully",
+    user : {
+      id : user._id,
+      username : user.username,
+      email : user.email,
+      verify : user.verify,
+    }
   };
 };
